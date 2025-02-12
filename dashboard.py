@@ -53,7 +53,7 @@ def carrega_dados(caminho_arquivo):
     df = pd.read_csv(caminho_arquivo, engine='pyarrow', dtype_backend='pyarrow')
     return df
 
-@st.cache_data
+# @st.cache_data
 def carrega_parquet(caminho_arquivo):
     df = pd.read_parquet(caminho_arquivo, engine='pyarrow', dtype_backend='pyarrow')
     return df
@@ -163,7 +163,8 @@ def cria_mapa(df, malha, locais='ibge', cor='ocorrencias', tons=None, tons_midpo
 
 
 # VARIAVEIS
-dados_atlas = carrega_parquet('./data/desastres_latam3.parquet')
+dados_atlas = carrega_parquet('./data/novo_desastres_latam3.parquet')
+risco_muni = carrega_parquet('./data/risco_municipios.parquet')
 dados_merge = carrega_parquet('./data/area2.parquet')
 coord_uf = carrega_parquet('./data/coord_uf.parquet')
 coord_muni = carrega_parquet('./data/coord_muni.parquet')
@@ -200,7 +201,7 @@ estados = {
     'Tocantins': 'TO'
 }
 
-anos = np.arange(1991, 2024)
+anos = np.arange(1991, 2025)
 anos_latam = np.arange(2000, 2024)
 anos_psr = np.arange(2006, 2022)
 mapa_de_cores = {
@@ -444,6 +445,10 @@ with tabs[0]:
     
     col_dados2.download_button('Baixar tabela', tabela_merge.to_csv(sep=';', index=False), file_name=f'ocorrencias_{uf_selecionado}.csv', mime='text/csv', use_container_width=True)
 
+    # jogar o risk_score na função scipy.stats.norm.csf("risk_score")
+    risco_muni_filtrado = risco_muni.query("uf == @uf_selecionado").sort_values("Ranking_Muni_UF")
+    st.header(f"Risco geral dos Municipios ({uf_selecionado})")
+    st.dataframe(risco_muni_filtrado, use_container_width=True)
 
 
     # LINEPLOT
